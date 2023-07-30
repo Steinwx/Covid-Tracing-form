@@ -1,5 +1,5 @@
 import tkinter as tk
-import logging
+import csv
 
 class CovidTracingApp(tk.Tk):
     def __init__(self):
@@ -85,11 +85,15 @@ class CovidForm(tk.Frame):
         # You can also call other functions to perform additional actions here.
 
     def log_form_data(self, name, phone, address, selected_symptoms):
-        logging.basicConfig(filename='form_logs.txt', level=logging.INFO, format='%(asctime)s - %(message)s')
-        logging.info(f"Name: {name}")
-        logging.info(f"Phone: {phone}")
-        logging.info(f"Address: {address}")
-        logging.info(f"Symptoms: {', '.join(selected_symptoms)}")
+        with open('form_logs.csv', mode='a', newline='') as file:
+            fieldnames = ['Name', 'Phone', 'Address', 'Symptoms']
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
+
+            # Check if the file is empty and add the header only if it is.
+            if file.tell() == 0:
+                writer.writeheader()
+
+            writer.writerow({'Name': name, 'Phone': phone, 'Address': address, 'Symptoms': ', '.join(selected_symptoms)})
 
 
 if __name__ == "__main__":
