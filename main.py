@@ -2,54 +2,73 @@ import tkinter as tk
 import csv
 from datetime import datetime
 
-def record_response():
-    name = entry_name.get()
-    phone = entry_phone.get()
-    location = entry_location.get()
-    symptoms = entry_symptoms.get("1.0", tk.END)
+class CovidTracingApp(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("COVID Tracing App")
+        self.responses = []  # List to store the recorded responses
+        self.create_widgets()
 
-    # Get the current date and time
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    def create_widgets(self):
+        self.label_name = tk.Label(self, text="Name:")
+        self.label_name.pack()
+        self.entry_name = tk.Entry(self)
+        self.entry_name.pack()
 
-    # Append the data to a CSV file
-    with open('responses.csv', 'a', newline='') as csvfile:
-        csv_writer = csv.writer(csvfile)
-        csv_writer.writerow([timestamp, name, phone, location, symptoms])
+        self.label_phone = tk.Label(self, text="Phone:")
+        self.label_phone.pack()
+        self.entry_phone = tk.Entry(self)
+        self.entry_phone.pack()
 
-    # Clear the input fields after recording the response
-    entry_name.delete(0, tk.END)
-    entry_phone.delete(0, tk.END)
-    entry_location.delete(0, tk.END)
-    entry_symptoms.delete("1.0", tk.END)
+        self.label_location = tk.Label(self, text="Location:")
+        self.label_location.pack()
+        self.entry_location = tk.Entry(self)
+        self.entry_location.pack()
 
-# Create the main window
-root = tk.Tk()
-root.title("COVID Tracing App")
+        self.label_symptoms = tk.Label(self, text="Symptoms:")
+        self.label_symptoms.pack()
+        self.entry_symptoms = tk.Text(self, height=5, width=30)
+        self.entry_symptoms.pack()
 
-# Create and position labels and entry widgets
-label_name = tk.Label(root, text="Name:")
-label_name.pack()
-entry_name = tk.Entry(root)
-entry_name.pack()
+        self.record_button = tk.Button(self, text="Record Response", command=self.record_response)
+        self.record_button.pack()
 
-label_phone = tk.Label(root, text="Phone:")
-label_phone.pack()
-entry_phone = tk.Entry(root)
-entry_phone.pack()
+        self.log_button = tk.Button(self, text="View Log", command=self.view_log)
+        self.log_button.pack()
 
-label_location = tk.Label(root, text="Location:")
-label_location.pack()
-entry_location = tk.Entry(root)
-entry_location.pack()
+    def record_response(self):
+        name = self.entry_name.get()
+        phone = self.entry_phone.get()
+        location = self.entry_location.get()
+        symptoms = self.entry_symptoms.get("1.0", tk.END)
 
-label_symptoms = tk.Label(root, text="Symptoms:")
-label_symptoms.pack()
-entry_symptoms = tk.Text(root, height=5, width=30)
-entry_symptoms.pack()
+        # Get the current date and time
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-# Create the record button
-record_button = tk.Button(root, text="Record Response", command=record_response)
-record_button.pack()
+        # Append the data to the responses list
+        self.responses.append((timestamp, name, phone, location, symptoms))
 
-# Start the Tkinter event loop
-root.mainloop()
+        # Append the data to a CSV file
+        with open('responses.csv', 'a', newline='') as csvfile:
+            csv_writer = csv.writer(csvfile)
+            csv_writer.writerow([timestamp, name, phone, location, symptoms])
+
+        # Clear the input fields after recording the response
+        self.entry_name.delete(0, tk.END)
+        self.entry_phone.delete(0, tk.END)
+        self.entry_location.delete(0, tk.END)
+        self.entry_symptoms.delete("1.0", tk.END)
+
+    def view_log(self):
+        log_window = tk.Toplevel(self)
+        log_window.title("Recorded Entries")
+        log_text = tk.Text(log_window, height=20, width=50)
+        log_text.pack()
+
+        # Display all the recorded responses in the log window
+        for response in self.responses:
+            log_text.insert(tk.END, f"Time: {response[0]}\nName: {response[1]}\nPhone: {response[2]}\nLocation: {response[3]}\nSymptoms: {response[4]}\n\n")
+
+if __name__ == "__main__":
+    app = CovidTracingApp()
+    app.mainloop()
