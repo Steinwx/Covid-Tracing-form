@@ -1,13 +1,5 @@
 import tkinter as tk
-<<<<<<< HEAD
-<<<<<<< HEAD
-from covid_form import CovidForm
-=======
-import logging
->>>>>>> parent of a35ca2d (Change txt to csv)
-=======
 import csv
->>>>>>> parent of 2852714 (Separated files for readability)
 
 class CovidTracingApp(tk.Tk):
     def __init__(self):
@@ -18,11 +10,6 @@ class CovidTracingApp(tk.Tk):
         self.form = CovidForm(self)
         self.form.pack(expand=True, fill='both')
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> parent of 2852714 (Separated files for readability)
 
 class CovidForm(tk.Frame):
     def __init__(self, parent):
@@ -98,16 +85,6 @@ class CovidForm(tk.Frame):
         # You can also call other functions to perform additional actions here.
 
     def log_form_data(self, name, phone, address, selected_symptoms):
-<<<<<<< HEAD
-        logging.basicConfig(filename='form_logs.txt', level=logging.INFO, format='%(asctime)s - %(message)s')
-        logging.info(f"Name: {name}")
-        logging.info(f"Phone: {phone}")
-        logging.info(f"Address: {address}")
-        logging.info(f"Symptoms: {', '.join(selected_symptoms)}")
-
-
->>>>>>> parent of a35ca2d (Change txt to csv)
-=======
         with open('form_logs.csv', mode='a', newline='') as file:
             fieldnames = ['Name', 'Phone', 'Address', 'Symptoms']
             writer = csv.DictWriter(file, fieldnames=fieldnames)
@@ -119,7 +96,6 @@ class CovidForm(tk.Frame):
             writer.writerow({'Name': name, 'Phone': phone, 'Address': address, 'Symptoms': ', '.join(selected_symptoms)})
 
 
->>>>>>> parent of 2852714 (Separated files for readability)
 if __name__ == "__main__":
     app = CovidTracingApp()
     app.mainloop()
