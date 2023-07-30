@@ -1,11 +1,26 @@
 import tkinter as tk
 import csv
 
+class CsvLogger:
+    def __init__(self, file_path):
+        self.file_path = file_path
+
+    def log_form_data(self, name, phone, address, vaccine_taken, exposure, selected_symptoms):
+        with open(self.file_path, mode='a', newline='') as file:
+            fieldnames = ['Name', 'Phone', 'Address', 'Covid Vaccine Taken', 'Exposure from Other Covid Patients', 'Symptoms']
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
+
+            if file.tell() == 0:
+                writer.writeheader()
+
+            writer.writerow({'Name': name, 'Phone': phone, 'Address': address, 'Covid Vaccine Taken': vaccine_taken, 'Exposure from Other Covid Patients': exposure, 'Symptoms': ', '.join(selected_symptoms)})
+
+
 class CovidTracingApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("COVID Tracing App")
-        self.geometry("400x500")
+        self.geometry("400x550")
         
         self.form = CovidForm(self)
         self.form.pack(expand=True, fill='both')
@@ -18,6 +33,8 @@ class CovidForm(tk.Frame):
         self.name_var = tk.StringVar()
         self.phone_var = tk.StringVar()
         self.address_var = tk.StringVar()
+        self.vaccine_taken_var = tk.StringVar()
+        self.exposure_var = tk.StringVar()
 
         self.symptoms = {
             "Fever": tk.IntVar(),
@@ -58,6 +75,18 @@ class CovidForm(tk.Frame):
         address_entry = tk.Entry(self, textvariable=self.address_var)
         address_entry.pack(fill='x', padx=10)
 
+        vaccine_taken_label = tk.Label(self, text="Covid Vaccine Taken:")
+        vaccine_taken_label.pack(anchor="w", padx=10)
+
+        vaccine_taken_entry = tk.Entry(self, textvariable=self.vaccine_taken_var)
+        vaccine_taken_entry.pack(fill='x', padx=10)
+
+        exposure_label = tk.Label(self, text="Exposure from Other Covid Patients:")
+        exposure_label.pack(anchor="w", padx=10)
+
+        exposure_entry = tk.Entry(self, textvariable=self.exposure_var)
+        exposure_entry.pack(fill='x', padx=10)
+
         for symptom, var in self.symptoms.items():
             checkbox = tk.Checkbutton(self, text=symptom, variable=var, onvalue=1, offvalue=0)
             checkbox.pack(anchor="w", padx=10, pady=5)
@@ -69,6 +98,8 @@ class CovidForm(tk.Frame):
         name = self.name_var.get()
         phone = self.phone_var.get()
         address = self.address_var.get()
+        vaccine_taken = self.vaccine_taken_var.get()
+        exposure = self.exposure_var.get()
 
         selected_symptoms = [symptom for symptom, var in self.symptoms.items() if var.get() == 1 and symptom != "None of the above"]
 
@@ -77,24 +108,13 @@ class CovidForm(tk.Frame):
 
         if selected_symptoms:
             symptoms_string = ", ".join(selected_symptoms)
-            message = f"Thank you, {name}, for submitting the form.\nPhone: {phone}\nAddress: {address}\nYou have selected the following symptoms: {symptoms_string}"
+            message = f"Thank you, {name}, for submitting the form.\nPhone: {phone}\nAddress: {address}\nCovid Vaccine Taken: {vaccine_taken}\nExposure from Other Covid Patients: {exposure}\nYou have selected the following symptoms: {symptoms_string}"
         else:
-            message = f"Thank you, {name}, for submitting the form.\nPhone: {phone}\nAddress: {address}\nYou have not selected any symptoms."
+            message = f"Thank you, {name}, for submitting the form.\nPhone: {phone}\nAddress: {address}\nCovid Vaccine Taken: {vaccine_taken}\nExposure from Other Covid Patients: {exposure}\nYou have not selected any symptoms."
 
-        self.log_form_data(name, phone, address, selected_symptoms)
+        logger = CsvLogger('form_logs.csv')
+        logger.log_form_data(name, phone, address, vaccine_taken, exposure, selected_symptoms)
         # You can also call other functions to perform additional actions here.
-
-    def log_form_data(self, name, phone, address, selected_symptoms):
-        with open('form_logs.csv', mode='a', newline='') as file:
-            fieldnames = ['Name', 'Phone', 'Address', 'Symptoms']
-            writer = csv.DictWriter(file, fieldnames=fieldnames)
-
-            # Check if the file is empty and add the header only if it is.
-            if file.tell() == 0:
-                writer.writeheader()
-
-            writer.writerow({'Name': name, 'Phone': phone, 'Address': address, 'Symptoms': ', '.join(selected_symptoms)})
-
 
 if __name__ == "__main__":
     app = CovidTracingApp()
