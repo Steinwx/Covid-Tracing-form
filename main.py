@@ -6,6 +6,11 @@ class CsvLogger:
         self.file_path = file_path
 
     def log_form_data(self, name, phone, address, vaccine_taken, exposure, selected_symptoms):
+        # Mask sensitive data before logging
+        phone_masked = self.mask_phone_number(phone)
+        address_masked = self.mask_address(address)
+        vaccine_taken_masked = self.mask_vaccine_taken(vaccine_taken)
+
         with open(self.file_path, mode='a', newline='') as file:
             fieldnames = ['Name', 'Phone', 'Address', 'Covid Vaccine Taken', 'Exposure from Other Covid Patients', 'Symptoms']
             writer = csv.DictWriter(file, fieldnames=fieldnames)
@@ -13,7 +18,27 @@ class CsvLogger:
             if file.tell() == 0:
                 writer.writeheader()
 
-            writer.writerow({'Name': name, 'Phone': phone, 'Address': address, 'Covid Vaccine Taken': vaccine_taken, 'Exposure from Other Covid Patients': exposure, 'Symptoms': ', '.join(selected_symptoms)})
+            writer.writerow({'Name': name, 'Phone': phone_masked, 'Address': address_masked, 'Covid Vaccine Taken': vaccine_taken_masked, 'Exposure from Other Covid Patients': exposure, 'Symptoms': ', '.join(selected_symptoms)})
+
+    @staticmethod
+    def mask_phone_number(phone):
+        # Mask phone number except the last four digits
+        masked_chars = '*' * (len(phone) - 4)
+        return f"{masked_chars}{phone[-4:]}"
+    
+    @staticmethod
+    def mask_address(address):
+        # Mask address by showing only the first character and last character of each word
+        address_parts = address.split()
+        masked_address = ' '.join([f"{part[0]}{'*'*(len(part)-2)}{part[-1]}" for part in address_parts])
+        return masked_address
+
+    @staticmethod
+    def mask_vaccine_taken(vaccine_taken):
+        # Mask vaccine_taken by showing 'Yes' as 'Y**'
+        if vaccine_taken.lower() == 'yes':
+            return 'Y**'
+        return vaccine_taken
 
 
 class CovidTracingApp(tk.Tk):
